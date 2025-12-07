@@ -19,14 +19,15 @@ services:
       - key: DB_CONNECTION
         value: pgsql
       - key: DATABASE_URL
-        fromDatabase: mtvts-db
+        fromDatabase:
+          name: mtvts-db
+          property: connectionString
       - key: QUEUE_CONNECTION
         value: database
       - key: SESSION_DRIVER
         value: database
       - key: CACHE_STORE
         value: database
-    postDeployCommand: php artisan migrate --force
 
 databases:
   - name: mtvts-db

@@ -10,12 +10,13 @@ This project includes `render.yaml` to provision a free Render Web Service (Dock
    - `APP_URL` = `https://<your-render-service-url>` (from the dashboard once created).
    - Ensure `APP_KEY` is present; the blueprint generates one, but regenerate if missing (`php artisan key:generate --show`).
 5) Click **Create Web Service**; first build will take a few minutes.
+6) After the first deploy, run migrations once via **Shell** → `php artisan migrate --force` (Docker services don’t support postDeployCommand in blueprint).
 
 ## What the blueprint does
 - Builds a Docker image from `backend/Dockerfile` (PHP 8.2 + Apache, pdo_pgsql, mbstring, zip, intl, bcmath, Composer install, docroot `public/`).
 - Provisions Postgres (`mtvts-db`) and injects `DATABASE_URL` + `DB_CONNECTION=pgsql`.
 - Sets sensible production defaults: `APP_ENV=production`, `APP_DEBUG=false`, database-backed queue/session/cache.
-- Runs `php artisan migrate --force` after deploy.
+- Migrations must be run manually once (`php artisan migrate --force` in Render Shell) since post-deploy commands aren’t supported on Docker blueprint services.
 
 ## Post-deploy checks
 - Open the service URL: `https://<your-render-service-url>/api/violation-types` should return JSON.
