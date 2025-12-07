@@ -22,11 +22,11 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 WORKDIR /var/www/html
 
 # Copy composer files first for better build caching
-COPY composer.json composer.lock ./
+COPY backend/composer.json backend/composer.lock ./
 RUN composer install --no-dev --no-progress --prefer-dist --optimize-autoloader
 
 # Copy application source
-COPY . .
+COPY backend/. .
 
 # Set Laravel writable dirs
 RUN chown -R www-data:www-data storage bootstrap/cache
