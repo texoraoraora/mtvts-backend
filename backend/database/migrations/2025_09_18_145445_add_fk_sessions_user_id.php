@@ -41,13 +41,14 @@ return new class extends Migration {
                 ");
             } catch (\Throwable $ignored) {
                 // Postgres cleanup
-                DB::statement("
-                    UPDATE sessions s
-                    SET user_id = NULL
-                    WHERE user_id IS NOT NULL AND NOT EXISTS (
-                        SELECT 1 FROM users u WHERE u.id = s.user_id
-                    )
-                ");
+               DB::statement("
+        UPDATE sessions
+        SET user_id = NULL
+        WHERE user_id IS NOT NULL
+        AND NOT EXISTS (
+            SELECT 1 FROM users WHERE users.id = sessions.user_id
+        )
+    ");
             }
 
             // Drop existing FK if present (idempotent)
@@ -57,20 +58,21 @@ return new class extends Migration {
             }
 
             // ⚠️ Do NOT add a manual index; MySQL will add one automatically for the FK
-            Schema::table('sessions', function (Blueprint $table) {
-                $table->foreign('user_id')
-                    ->references('id')->on('users')
-                    ->nullOnDelete(); // or ->cascadeOnDelete();
-            });
-        }
+           Schema::table('sessions', function (Blueprint $table) {
+        $table->foreign('user_id')->references('id')->on('users')->nullOnDelete();
+    });
+}
+
     }
 
     public function down(): void
     {
         if (Schema::hasTable('sessions') && Schema::hasColumn('sessions', 'user_id')) {
             try {
-                Schema::table('sessions', fn(Blueprint $t) => $t->dropForeign(['user_id']));
-            } catch (\Throwable $e) {
+                Schema::table('sessions', function (Blueprint $table) {
+        $table->dropForeign(['user_id']);
+    });
+                catch (\Throwable $e) {
             }
             // No need to drop index explicitly; MySQL created it for the FK.
         }
